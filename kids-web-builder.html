@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebWizard Jr. 🧙‍♂️</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sun: #FFD93D;
+    --coral: #FF6B6B;
+    --mint: #6BCB77;
+    --sky: #4D96FF;
+    --purple: #C77DFF;
+    --bg: #0f0e17;
+    --card: #1a1a2e;
+    --card2: #16213e;
+    --text: #fffffe;
+    --sub: #a7a9be;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated starfield */
+  .stars {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none; z-index: 0;
+    overflow: hidden;
+  }
+  .star {
+    position: absolute;
+    border-radius: 50%;
+    background: white;
+    animation: twinkle var(--d, 3s) ease-in-out infinite;
+    opacity: 0;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0; transform: scale(0.8); }
+    50% { opacity: 0.8; transform: scale(1.2); }
+  }
+
+  .container {
+    position: relative; z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    padding: 30px 0 10px;
+    animation: fadeDown 0.6s ease;
+  }
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2.4rem, 6vw, 3.6rem);
+    background: linear-gradient(90deg, var(--sun), var(--coral), var(--purple), var(--sky));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 1px;
+  }
+  header p {
+    color: var(--sub);
+    font-size: 1.05rem;
+    margin-top: 6px;
+    font-weight: 600;
+  }
+
+  /* LEVEL BADGE */
+  .level-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 18px 0 24px;
+    flex-wrap: wrap;
+  }
+  .level-badge {
+    padding: 8px 22px;
+    border-radius: 50px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.4s ease;
+    border: 2px solid transparent;
+  }
+  .level-badge.beginner  { background: #1a2e1a; color: var(--mint);   border-color: var(--mint); }
+  .level-badge.explorer  { background: #1a1f2e; color: var(--sky);    border-color: var(--sky); }
+  .level-badge.builder   { background: #2e1a2e; color: var(--purple); border-color: var(--purple); }
+  .level-badge.wizard    { background: #2e1a1a; color: var(--coral);  border-color: var(--coral); }
+  .level-badge.superstar { background: #2e2a1a; color: var(--sun);    border-color: var(--sun); }
+
+  .xp-bar-wrap {
+    background: #ffffff18;
+    border-radius: 50px;
+    height: 10px;
+    width: 200px;
+    overflow: hidden;
+  }
+  .xp-bar {
+    height: 100%;
+    border-radius: 50px;
+    background: linear-gradient(90deg, var(--sky), var(--purple));
+    transition: width 0.6s ease;
+  }
+
+  /* MAIN LAYOUT */
+  .workspace {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 720px) { .workspace { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--card);
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1.5px solid #ffffff12;
+    box-shadow: 0 8px 32px #0005;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panel-header {
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    border-bottom: 1.5px solid #ffffff10;
+  }
+  .panel-header .dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+  }
+  .panel-header .dot.red    { background: #ff5f57; }
+  .panel-header .dot.yellow { background: #febc2e; }
+  .panel-header .dot.green  { background: #28c840; }
+
+  /* CHALLENGES */
+  .challenge-strip {
+    display: flex;
+    gap: 10px;
+    padding: 14px 18px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 1.5px solid #ffffff10;
+  }
+  .challenge-strip::-webkit-scrollbar { display: none; }
+
+  .ch-btn {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    border-radius: 50px;
+    border: 2px solid #ffffff20;
+    background: transparent;
+    color: var(--sub);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .ch-btn:hover { border-color: var(--sky); color: var(--sky); }
+  .ch-btn.active { background: var(--sky); border-color: var(--sky); color: #fff; }
+  .ch-btn.done   { background: var(--mint); border-color: var(--mint); color: #fff; }
+
+  .challenge-desc {
+    padding: 14px 18px;
+    font-size: 0.92rem;
+    color: var(--sub);
+    line-height: 1.6;
+    border-bottom: 1.5px solid #ffffff10;
+  }
+  .challenge-desc strong { color: var(--sun); }
+
+  /* CODE EDITOR */
+  .code-area {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .line-numbers {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 40px;
+    padding: 16px 0;
+    text-align: right;
+    padding-right: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.82rem;
+    color: #ffffff30;
+    pointer-events: none;
+    line-height: 1.55;
+    user-select: none;
+  }
+
+  textarea#code-input {
+    flex: 1;
+    min-height: 240px;
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    color: #e0e0ff;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    padding: 16px 16px 16px 52px;
+    caret-color: var(--sun);
+    tab-size: 2;
+  }
+
+  .code-actions {
+    display: flex;
+    gap: 10px;
+    padding: 14px 18px;
+    border-top: 1.5px solid #ffffff10;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 10px 22px;
+    border-radius: 50px;
+    border: none;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-run   { background: var(--mint);   color: #0f2010; }
+  .btn-check { background: var(--purple); color: #fff; }
+  .btn-hint  { background: #ffffff15;     color: var(--sub); border: 1.5px solid #ffffff20; }
+  .btn:hover { filter: brightness(1.12); transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+
+  /* PREVIEW */
+  .preview-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  iframe#preview {
+    flex: 1;
+    min-height: 280px;
+    border: none;
+    background: white;
+  }
+
+  /* AI FEEDBACK */
+  .ai-panel {
+    background: var(--card2);
+    border-radius: 20px;
+    border: 1.5px solid #ffffff12;
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px #0005;
+  }
+
+  .ai-panel .panel-header {
+    background: linear-gradient(90deg, #1a0e2e, #0e1a2e);
+  }
+
+  .ai-content {
+    padding: 20px 22px;
+    min-height: 90px;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--sub);
+  }
+  .ai-content.loading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .ai-content p { margin-bottom: 8px; }
+  .ai-content strong { color: var(--text); }
+
+  .typing-dots {
+    display: flex; gap: 5px;
+  }
+  .typing-dots span {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--purple);
+    animation: bounce 0.9s ease-in-out infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.30s; }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); opacity: 0.5; }
+    50%       { transform: translateY(-6px); opacity: 1; }
+  }
+
+  /* SKILL INDICATORS */
+  .skills-row {
+    display: flex;
+    gap: 10px;
+    padding: 0 22px 20px;
+    flex-wrap: wrap;
+  }
+  .skill-pill {
+    padding: 5px 14px;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border: 1.5px solid;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.35s ease;
+  }
+  .skill-pill.show {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .skill-pill.green  { color: var(--mint);   border-color: var(--mint);   background: #0a2010; }
+  .skill-pill.blue   { color: var(--sky);    border-color: var(--sky);    background: #0a1020; }
+  .skill-pill.yellow { color: var(--sun);    border-color: var(--sun);    background: #20180a; }
+  .skill-pill.red    { color: var(--coral);  border-color: var(--coral);  background: #20080a; }
+  .skill-pill.purple { color: var(--purple); border-color: var(--purple); background: #180a20; }
+
+  /* HINT BOX */
+  .hint-box {
+    display: none;
+    background: #1a150a;
+    border: 1.5px solid var(--sun);
+    border-radius: 14px;
+    padding: 14px 18px;
+    font-size: 0.9rem;
+    color: #ffe08a;
+    margin: 0 18px 14px;
+    line-height: 1.6;
+  }
+  .hint-box.show { display: block; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 30px; right: 30px;
+    padding: 14px 24px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.4s ease;
+    z-index: 999;
+    box-shadow: 0 8px 30px #0008;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { background: var(--mint); color: #0f2010; }
+  .toast.info    { background: var(--sky);  color: #0a1020; }
+  .toast.warn    { background: var(--sun);  color: #20180a; }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<div class="container">
+  <header>
+    <h1>🧙‍♂️ WebWizard Jr.</h1>
+    <p>Learn to build websites — step by step, challenge by challenge!</p>
+  </header>
+
+  <!-- Level Row -->
+  <div class="level-row">
+    <div class="level-badge beginner" id="level-badge">🌱 Beginner</div>
+    <div style="display:flex;flex-direction:column;gap:5px;align-items:center">
+      <span style="font-size:0.75rem;color:var(--sub);font-weight:700">XP: <span id="xp-count">0</span> / 100</span>
+      <div class="xp-bar-wrap"><div class="xp-bar" id="xp-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- Workspace: Editor + Preview -->
+  <div class="workspace">
+    <!-- Editor Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+        <span>✏️ Your Code</span>
+      </div>
+      <div class="challenge-strip" id="challenge-strip"></div>
+      <div class="challenge-desc" id="challenge-desc">← Pick a challenge above to get started!</div>
+      <div class="hint-box" id="hint-box">💡 Hint loading…</div>
+      <div class="code-area">
+        <div class="line-numbers" id="line-numbers">1</div>
+        <textarea id="code-input" spellcheck="false" placeholder="Type your HTML here…"></textarea>
+      </div>
+      <div class="code-actions">
+        <button class="btn btn-run"   onclick="runCode()">▶ Run</button>
+        <button class="btn btn-check" onclick="checkWithAI()">🤖 Check My Code</button>
+        <button class="btn btn-hint"  onclick="toggleHint()">💡 Hint</button>
+      </div>
+    </div>
+
+    <!-- Preview Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+        <span>🌐 Preview</span>
+      </div>
+      <div class="preview-wrap">
+        <iframe id="preview" sandbox="allow-scripts"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Feedback Panel -->
+  <div class="ai-panel">
+    <div class="panel-header" style="justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:1.4rem">🤖</span>
+        <span>Wizard AI — Your Coding Coach</span>
+      </div>
+      <span style="font-size:0.78rem;color:var(--sub);font-weight:600">Powered by Claude</span>
+    </div>
+    <div class="ai-content" id="ai-content">
+      <p>Hi! I'm your AI coding coach. 👋</p>
+      <p>Pick a challenge, write some code, then hit <strong>Check My Code</strong> and I'll tell you how you're doing — and what level you're at!</p>
+    </div>
+    <div class="skills-row" id="skills-row"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const challenges = [
+  {
+    id: "hello",
+    label: "👋 Hello World",
+    desc: "Create your very first webpage! Make a <strong>heading</strong> that says your name, and a <strong>paragraph</strong> that says 'I am learning HTML!'",
+    hint: "Try using the <h1> tag for the heading and the <p> tag for the paragraph.",
+    starter: `<!DOCTYPE html>\n<html>\n  <head>\n    <title>My Page</title>\n  </head>\n  <body>\n    <!-- Write your code here! -->\n    \n  </body>\n</html>`,
+  },
+  {
+    id: "colors",
+    label: "🎨 Colors",
+    desc: "Make your page colorful! Give the <strong>body</strong> a background color and make your heading a different color using the <strong>style</strong> attribute.",
+    hint: "You can use style=\"background-color: yellow\" on the body tag, and style=\"color: blue\" on your h1 tag.",
+    starter: `<!DOCTYPE html>\n<html>\n  <body style=\"\">\n    <h1 style=\"\">My Colorful Page</h1>\n    <p>Colors make pages fun!</p>\n  </body>\n</html>`,
+  },
+  {
+    id: "list",
+    label: "📋 Lists",
+    desc: "Create a list of your <strong>3 favorite foods</strong> using an unordered list (<code>&lt;ul&gt;</code>) with list items (<code>&lt;li&gt;</code>).",
+    hint: "A list looks like: <ul><li>Pizza</li><li>Ice Cream</li></ul>",
+    starter: `<!DOCTYPE html>\n<html>\n  <body>\n    <h2>My Favorite Foods</h2>\n    <ul>\n      <!-- Add your foods here! -->\n    </ul>\n  </body>\n</html>`,
+  },
+  {
+    id: "link",
+    label: "🔗 Links",
+    desc: "Add a <strong>clickable link</strong> to your page using the <code>&lt;a&gt;</code> tag. Link to https://www.google.com and make it say 'Search the Web'.",
+    hint: "The anchor tag looks like: <a href=\"https://google.com\">Click me!</a>",
+    starter: `<!DOCTYPE html>\n<html>\n  <body>\n    <h2>My Useful Links</h2>\n    <!-- Add your link here! -->\n  </body>\n</html>`,
+  },
+  {
+    id: "css",
+    label: "💅 CSS Style",
+    desc: "Use a <strong>&lt;style&gt;</strong> block to make your page look awesome! Change the font, add padding, and use at least 2 different CSS rules.",
+    hint: "Put <style>body { font-family: Arial; background: #f0f0f0; }</style> inside your <head> tag.",
+    starter: `<!DOCTYPE html>\n<html>\n  <head>\n    <style>\n      /* Write CSS here! */\n      \n    </style>\n  </head>\n  <body>\n    <h1>Styled Page</h1>\n    <p>CSS makes things look great!</p>\n  </body>\n</html>`,
+  },
+  {
+    id: "card",
+    label: "🃏 Profile Card",
+    desc: "Build a <strong>profile card</strong>! Include your name, a fun emoji 'photo', a short bio, and style it with CSS to look like a card with a border and rounded corners.",
+    hint: "Use a <div> with style=\"border: 2px solid black; border-radius: 12px; padding: 20px; width: 200px;\"",
+    starter: `<!DOCTYPE html>\n<html>\n  <head>\n    <style>\n      .card {\n        /* Style your card! */\n      }\n    </style>\n  </head>\n  <body>\n    <div class=\"card\">\n      <!-- Your profile content here -->\n    </div>\n  </body>\n</html>`,
+  },
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let currentChallenge = null;
+let xp = 0;
+let completedChallenges = new Set();
+
+const levels = [
+  { min: 0,   label: "🌱 Beginner",   cls: "beginner"  },
+  { min: 20,  label: "🔭 Explorer",   cls: "explorer"  },
+  { min: 45,  label: "🔨 Builder",    cls: "builder"   },
+  { min: 70,  label: "🧙 Wizard",     cls: "wizard"    },
+  { min: 95,  label: "⭐ Superstar",  cls: "superstar" },
+];
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+function init() {
+  makeStars();
+  renderChallengeStrip();
+  selectChallenge(challenges[0]);
+  updateLineNumbers();
+  document.getElementById('code-input').addEventListener('input', updateLineNumbers);
+  document.getElementById('code-input').addEventListener('keydown', handleTab);
+}
+
+function makeStars() {
+  const wrap = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.5 + 1;
+    s.style.cssText = `
+      width:${size}px;height:${size}px;
+      left:${Math.random()*100}%;top:${Math.random()*100}%;
+      --d:${(Math.random()*4+2).toFixed(1)}s;
+      animation-delay:${(Math.random()*5).toFixed(1)}s;
+    `;
+    wrap.appendChild(s);
+  }
+}
+
+function renderChallengeStrip() {
+  const strip = document.getElementById('challenge-strip');
+  strip.innerHTML = '';
+  challenges.forEach(ch => {
+    const b = document.createElement('button');
+    b.className = 'ch-btn' + (completedChallenges.has(ch.id) ? ' done' : '');
+    b.textContent = ch.label;
+    b.onclick = () => selectChallenge(ch);
+    b.dataset.id = ch.id;
+    strip.appendChild(b);
+  });
+}
+
+function selectChallenge(ch) {
+  currentChallenge = ch;
+  document.getElementById('challenge-desc').innerHTML = ch.desc;
+  document.getElementById('code-input').value = ch.starter;
+  document.getElementById('hint-box').classList.remove('show');
+  document.getElementById('ai-content').innerHTML = `<p>Ready for <strong>${ch.label}</strong>! Write your code and click <strong>Check My Code</strong> when you're done. 🚀</p>`;
+  document.getElementById('skills-row').innerHTML = '';
+  document.querySelectorAll('.ch-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.id === ch.id);
+  });
+  runCode();
+  updateLineNumbers();
+}
+
+// ── EDITOR ────────────────────────────────────────────────────────────────────
+function updateLineNumbers() {
+  const lines = document.getElementById('code-input').value.split('\n').length;
+  document.getElementById('line-numbers').innerHTML = Array.from({length:lines},(_,i)=>i+1).join('<br>');
+}
+function handleTab(e) {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const ta = e.target;
+    const s = ta.selectionStart;
+    ta.value = ta.value.slice(0,s) + '  ' + ta.value.slice(ta.selectionEnd);
+    ta.selectionStart = ta.selectionEnd = s + 2;
+  }
+}
+
+// ── PREVIEW ───────────────────────────────────────────────────────────────────
+function runCode() {
+  const code = document.getElementById('code-input').value;
+  const iframe = document.getElementById('preview');
+  iframe.srcdoc = code;
+}
+
+// ── HINT ──────────────────────────────────────────────────────────────────────
+function toggleHint() {
+  const box = document.getElementById('hint-box');
+  if (!box.classList.contains('show')) {
+    box.innerHTML = `💡 <strong>Hint:</strong> ${currentChallenge.hint}`;
+    box.classList.add('show');
+  } else {
+    box.classList.remove('show');
+  }
+}
+
+// ── AI CHECK ──────────────────────────────────────────────────────────────────
+async function checkWithAI() {
+  if (!currentChallenge) return;
+  const code = document.getElementById('code-input').value.trim();
+  if (!code || code === currentChallenge.starter.trim()) {
+    showToast("✏️ Write some code first!", "warn");
+    return;
+  }
+
+  const aiBox = document.getElementById('ai-content');
+  const skillsRow = document.getElementById('skills-row');
+
+  aiBox.className = 'ai-content loading';
+  aiBox.innerHTML = `
+    <div class="typing-dots"><span></span><span></span><span></span></div>
+    <span style="color:var(--sub);font-size:0.9rem">Wizard AI is reading your code…</span>
+  `;
+  skillsRow.innerHTML = '';
+
+  const systemPrompt = `You are "Wizard AI", a warm, encouraging coding coach for children aged 7–14 learning HTML and CSS. Your job is to:
+1. Assess their skill level based on their code (Beginner / Explorer / Builder / Wizard / Superstar).
+2. Give short, enthusiastic feedback (2-3 sentences) that is positive first, then constructive.
+3. Identify specific skills demonstrated in their code.
+4. Assign XP (0-20) for this submission.
+
+Respond ONLY with valid JSON in this exact format (no markdown, no backticks):
+{
+  "level": "Beginner",
+  "feedback": "Your short feedback here!",
+  "skills": ["HTML tags", "Headings"],
+  "xp": 12,
+  "tip": "One specific next thing they could try"
+}
+
+Skill options (pick what applies): HTML tags, Headings, Paragraphs, Colors, CSS styling, Lists, Links, Divs, Classes, Flexbox, Animations, Forms, Semantic HTML, CSS variables, Responsive design.`;
+
+  const userMsg = `Challenge: "${currentChallenge.label}"
+Challenge description: ${currentChallenge.desc.replace(/<[^>]+>/g,'')}
+Child's code:
+${code}`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 400,
+        system: systemPrompt,
+        messages: [{ role: "user", content: userMsg }]
+      })
+    });
+
+    const data = await res.json();
+    const raw = data.content?.map(b => b.text || '').join('') || '';
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+
+    // Update XP
+    const earned = Math.min(parsed.xp || 10, 20);
+    if (!completedChallenges.has(currentChallenge.id)) {
+      xp = Math.min(xp + earned, 100);
+      completedChallenges.add(currentChallenge.id);
+      updateXP();
+      renderChallengeStrip();
+      showToast(`+${earned} XP earned! 🎉`, "success");
+    }
+
+    // Show feedback
+    aiBox.className = 'ai-content';
+    aiBox.innerHTML = `
+      <p><strong>Level detected: ${parsed.level} ✨</strong></p>
+      <p>${parsed.feedback}</p>
+      ${parsed.tip ? `<p style="color:var(--sky)">💡 <strong>Next step:</strong> ${parsed.tip}</p>` : ''}
+    `;
+
+    // Show skill pills
+    if (parsed.skills?.length) {
+      skillsRow.innerHTML = '';
+      const colors = ['green','blue','yellow','purple','red'];
+      parsed.skills.forEach((sk, i) => {
+        const pill = document.createElement('div');
+        pill.className = `skill-pill ${colors[i % colors.length]}`;
+        pill.textContent = '✓ ' + sk;
+        skillsRow.appendChild(pill);
+        setTimeout(() => pill.classList.add('show'), 100 * i);
+      });
+    }
+
+  } catch (err) {
+    aiBox.className = 'ai-content';
+    aiBox.innerHTML = `<p style="color:var(--coral)">Oops! Couldn't connect to Wizard AI. Make sure you have an internet connection and try again!</p>`;
+  }
+}
+
+// ── XP & LEVELS ───────────────────────────────────────────────────────────────
+function updateXP() {
+  document.getElementById('xp-count').textContent = xp;
+  document.getElementById('xp-bar').style.width = xp + '%';
+  const lvl = [...levels].reverse().find(l => xp >= l.min) || levels[0];
+  const badge = document.getElementById('level-badge');
+  badge.textContent = lvl.label;
+  badge.className = 'level-badge ' + lvl.cls;
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function showToast(msg, type = "info") {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── GO ────────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
